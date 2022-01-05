@@ -52,12 +52,14 @@ class Cube(pygame.sprite.Sprite):
 class Chel(pygame.sprite.Sprite):
     IMG = {'sad': load_image('чел грустит.png', 'челикс'),
            'fun': load_image('чел с улыбкой.png', 'челикс'),
-           'side': load_image('чел сбоку с улыбкой.png', 'челикс'),}
+           'side': load_image('чел сбоку с улыбкой.png', 'челикс'), }
+
     def __init__(self, *group, **kwargs):
         super(Chel, self).__init__(*group)
         self.image = Chel.IMG['side']
         self.rect = self.image.get_rect()
-        self.rect.x = 50
+        self.rect.x = 250
         self.rect.y = 800 - 150 - 60
-    def update(self, *args, **kwargs):
-        pass
+
+    def update(self, y):
+        self.rect.y -= y

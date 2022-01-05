@@ -19,7 +19,7 @@ def add_cubes(file_name):
     for i, row in enumerate(file):
         for col, el in enumerate(row):
             if el in 'bgyrs':
-                Cube(cubes, pos=(col * 50 , i * 50), img=el)
+                Cube(cubes, pos=(col * 50 + 300, i * 50), img=el)
                 end = max(end, col)
 
 
@@ -31,6 +31,15 @@ def draw_play_screen():
     pygame.display.flip()
 
 
+def check_event(event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        return True
+    # if event.type == pygame.KEYDOWN:
+    #     if event.key in [pygame.K_SPACE, pygame.K_RETURN, pygame.K_w]:
+    #         return True
+    # return False
+
+
 cubes = pygame.sprite.Group()
 add_cubes('lvl_1.txt')
 chel = pygame.sprite.Group()
@@ -38,23 +47,38 @@ Chel(chel)
 draw_play_screen()
 
 pygame.display.flip()
-x, elapsed = 0, 0
+elapsed = 0
 # clock = pygame.time.Clock()
-end = end * 50 - 200
+end = end * 50 + 100
 running = True
 run_man = False
+f = False
+up = None
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if check_event(event):
             run_man = True
             clock = pygame.time.Clock()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_man and not f:
+            up, up_flag = 100, True
+            f = True
     if run_man:
         seconds = elapsed / 1000.0
-        x += 200 * seconds
+        end -= 200 * seconds
         elapsed = clock.tick(30)
         draw_play_screen()
 
-        if x < end:
+        if end >= 0:
             cubes.update(200 * seconds)
+        if f and up_flag:
+            chel.update(200 * seconds)
+            up -= 300 * seconds
+            if up <= 0:
+                up_flag = False
+        if f and not up_flag:
+            chel.update(-200 * seconds)
+            up += 300 * seconds
+            if up >= 100:
+                f = False
