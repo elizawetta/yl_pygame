@@ -39,19 +39,19 @@ def check_event(event):
     # return False
 
 
-def check_jump():
+def check_jump(a):
     global in_jump, up_flag, up
     if in_jump and up_flag:
-        chel.update(200 * seconds)
-        up -= 200 * seconds
+        chel.update(chel_speed * seconds)
+        up -= chel_speed * seconds
         if up <= 0:
             up_flag = False
             for i in chel:
-                i.rect.y = 800 - 150 - 60 - 100
+                i.rect.y = 800 - 150 - 60 - a
     if in_jump and not up_flag:
-        chel.update(-200 * seconds)
-        up += 200 * seconds
-        if up >= 100:
+        chel.update(-chel_speed * seconds)
+        up += chel_speed * seconds
+        if up >= a:
             in_jump = False
             for i in chel:
                 i.rect.y = 800 - 150 - 60
@@ -70,24 +70,28 @@ end = end * 50 + 100
 running = True
 run_chel = False
 in_jump = False
+screen_speed = 200
+chel_speed = 205
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if check_event(event):
-            run_chel = True
+            run_chel = not run_chel
             clock = pygame.time.Clock()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_chel and not in_jump:
-            up, up_flag = 100, True
+            up, up_flag = 65, True
             in_jump = True
     if run_chel:
         seconds = elapsed / 1000.0
-        end -= 200 * seconds
+        end -= screen_speed * seconds
         elapsed = clock.tick(30)
         draw_play_screen()
 
         if end >= 0:
-            cubes.update(200 * seconds)
-        check_jump()
-    
+            cubes.update(screen_speed * seconds)
+
+        if in_jump:
+            check_jump(65)
+
     pygame.display.flip()
