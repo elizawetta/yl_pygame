@@ -28,7 +28,6 @@ def draw_play_screen():
     pygame.draw.rect(screen, 'black', (0, 800 - 150, 1400, 150))
     cubes.draw(screen)
     chel.draw(screen)
-    pygame.display.flip()
 
 
 def check_event(event):
@@ -38,6 +37,24 @@ def check_event(event):
     #     if event.key in [pygame.K_SPACE, pygame.K_RETURN, pygame.K_w]:
     #         return True
     # return False
+
+
+def check_jump():
+    global in_jump, up_flag, up
+    if in_jump and up_flag:
+        chel.update(200 * seconds)
+        up -= 200 * seconds
+        if up <= 0:
+            up_flag = False
+            for i in chel:
+                i.rect.y = 800 - 150 - 60 - 100
+    if in_jump and not up_flag:
+        chel.update(-200 * seconds)
+        up += 200 * seconds
+        if up >= 100:
+            in_jump = False
+            for i in chel:
+                i.rect.y = 800 - 150 - 60
 
 
 cubes = pygame.sprite.Group()
@@ -51,20 +68,19 @@ elapsed = 0
 # clock = pygame.time.Clock()
 end = end * 50 + 100
 running = True
-run_man = False
-f = False
-up = None
+run_chel = False
+in_jump = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if check_event(event):
-            run_man = True
+            run_chel = True
             clock = pygame.time.Clock()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_man and not f:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_chel and not in_jump:
             up, up_flag = 100, True
-            f = True
-    if run_man:
+            in_jump = True
+    if run_chel:
         seconds = elapsed / 1000.0
         end -= 200 * seconds
         elapsed = clock.tick(30)
@@ -72,13 +88,6 @@ while running:
 
         if end >= 0:
             cubes.update(200 * seconds)
-        if f and up_flag:
-            chel.update(200 * seconds)
-            up -= 300 * seconds
-            if up <= 0:
-                up_flag = False
-        if f and not up_flag:
-            chel.update(-200 * seconds)
-            up += 300 * seconds
-            if up >= 100:
-                f = False
+        check_jump()
+    
+    pygame.display.flip()

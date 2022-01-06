@@ -63,3 +63,7 @@ class Chel(pygame.sprite.Sprite):
 
     def update(self, y):
         self.rect.y -= y
+
+    # def set_pos(self, x=self.rect.x, y=self.rect.y):
+    #     self.rect.x = x
+    #     self.rect.y = y
