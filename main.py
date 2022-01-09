@@ -7,24 +7,37 @@ from oao import *
 
 pygame.init()
 pygame.display.set_caption('')
-size = width, height = 1400, 800
+size = width, height = 1200, 800
 screen = pygame.display.set_mode(size)
 screen_speed = 200
 chel_speed = 250
 
 
 def begin_play():
-    global cubes, lines, chel, end, run_chel, in_jump, level, start_play
+    global cubes, lines, chel
+    global run_chel, in_jump, start_play
+    global score, end, level
     cubes = pygame.sprite.Group()
     lines = pygame.sprite.Group()
     add_cubes('lvl_1.txt')
     chel = Chel()
 
     elapsed = 0
+    score = 0
     run_chel = False
     in_jump = False
     start_play = True
     level = chel.rect.y
+
+
+def get_points(color):
+    if color == (255, 0, 0):
+        return -5
+    if color == (255, 255, 0):
+        return 5
+    if color == (0, 255, 0):
+        return 10
+    return 0
 
 
 def add_cubes(file_name):
@@ -36,7 +49,7 @@ def add_cubes(file_name):
         for col, el in enumerate(row):
             if el in 'bgyrs':
                 Cube(cubes, pos=(col * 50 + 250, i * 50 + 150), img=el)
-                Line(lines, pos=(col * 50 + 250, i * 50 + 150))
+                Line(lines, pos=(col * 50 + 250, i * 50 + 150), color=el)
 
                 end = max(end, col)
     end = end * 50 - 50
@@ -62,7 +75,7 @@ def check_jump(a):
 def check_cross():
     global in_jump, up_flag, up
     global chel
-    global level
+    global level, score
     global run_chel, start_play
     for i in lines:
         if pygame.sprite.collide_mask(chel, i):
@@ -70,6 +83,8 @@ def check_cross():
                 chel.rect.y = i.rect.y - chel.height + 2
                 level = chel.rect.y
                 in_jump, up_flag = False, False
+                color = i.image.get_at((1, 1))[:3]
+                score += get_points(color)
             else:
                 run_chel = False
                 # TODO: при столкновении на уровень опускаться
@@ -80,6 +95,17 @@ def check_cross():
         lines.update(5)
         cubes.update(5)
         check_jump(65)
+
+
+def draw_score(screen):
+    font = pygame.font.Font(None, 50)
+    text1 = font.render(f'Score: {score}', False, '#44FF00')
+    text2 = font.render(f'Score: {score}', False, (0, 0, 0))
+    text_x = width // 2 - text1.get_width() // 2
+    text_y = height // 2 - text1.get_height() // 2
+
+    screen.blit(text2, (text_x + 2, text_y + 2))
+    screen.blit(text1, (text_x, text_y))
 
 
 def draw_play_screen():
@@ -94,6 +120,7 @@ def draw_play_screen():
     lines.draw(screen)
     cubes.draw(screen)
     chel.draw(screen)
+    draw_score(screen)
 
     if not run_chel:
         s = pygame.Surface((width, height))

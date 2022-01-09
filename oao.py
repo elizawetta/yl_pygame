@@ -13,23 +13,6 @@ def load_image(name, folder='', colorkey=None):
     return image
 
 
-class Camera:
-    # зададим начальный сдвиг камеры
-    def __init__(self):
-        self.dx = 0
-        self.dy = 0
-
-    # сдвинуть объект obj на смещение камеры
-    def apply(self, obj):
-        obj.rect.x += self.dx
-        obj.rect.y += self.dy
-
-    # позиционировать камеру на объекте target
-    def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
-
-
 class Cube(pygame.sprite.Sprite):
     IMG = {'b': load_image('black.png', 'images'),
            'g': load_image('green.png', 'images'),
@@ -54,12 +37,22 @@ class Line(pygame.sprite.Sprite):
     def __init__(self, *group, **kwargs):
         super(Line, self).__init__(*group)
         self.image = pygame.Surface((50, 2))
+        self.image.fill(self.get_color(kwargs['color']))
         x, y = kwargs['pos'][0], kwargs['pos'][1]
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.width = self.image.get_width()
+
+    def get_color(self, color):
+        if color == 'r':
+            return (255, 0, 0)
+        if color == 'y':
+            return (255, 255, 0)
+        if color == 'g':
+            return (0, 255, 0)
+        return (0, 0, 0)
 
     def update(self, x):
         self.rect.x -= x
