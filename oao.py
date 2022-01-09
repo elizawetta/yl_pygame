@@ -68,38 +68,20 @@ class Line(pygame.sprite.Sprite):
 class Chel(pygame.sprite.Sprite):
     IMG = {'sad': load_image('чел грустит.png', 'челикс'),
            'fun': load_image('чел с улыбкой.png', 'челикс'),
-           'side': load_image('чел сбоку с улыбкой.png', 'челикс'), }
+           'side': load_image('чел сбоку с улыбкой.png', 'челикс')}
 
     def __init__(self, *group, **kwargs):
         super(Chel, self).__init__(*group)
         self.image = Chel.IMG['side']
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect()
-        self.rect.x = 250
-        self.rect.y = 800 - 150 - 60
         self.height = self.image.get_height()
         self.width = self.image.get_width()
-
-
-    def update(self, y):
-        self.rect.y -= y
-
-    def draw(self, screen):
-        screen.blit(self.image, (self.rect.x, self.rect.y))
-
-class ChelLine(pygame.sprite.Sprite):
-    def __init__(self, *group, **kwargs):
-        super(ChelLine, self).__init__(*group)
-        self.image = pygame.Surface((20, 2))
-        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
-        self.rect.x = 250 + 16
-        self.rect.y = 800 - 150 - 60 + 62
-
+        self.rect.x = 250
+        self.rect.y = 800 - 150 - self.height
 
     def update(self, y):
         self.rect.y -= y
 
     def draw(self, screen):
         screen.blit(self.image, (self.rect.x, self.rect.y))
-
