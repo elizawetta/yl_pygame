@@ -41,9 +41,25 @@ class Cube(pygame.sprite.Sprite):
         '''pos: координаты, img: тип картинки'''
         super(Cube, self).__init__(*group)
         self.image = Cube.IMG[kwargs['img']]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = kwargs['pos'][0]
         self.rect.y = kwargs['pos'][1]
+
+    def update(self, x):
+        self.rect.x -= x
+
+
+class Line(pygame.sprite.Sprite):
+    def __init__(self, *group, **kwargs):
+        super(Line, self).__init__(*group)
+        self.image = pygame.Surface((50, 2))
+        x, y = kwargs['pos'][0], kwargs['pos'][1]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width()
 
     def update(self, x):
         self.rect.x -= x
@@ -57,13 +73,33 @@ class Chel(pygame.sprite.Sprite):
     def __init__(self, *group, **kwargs):
         super(Chel, self).__init__(*group)
         self.image = Chel.IMG['side']
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = 250
         self.rect.y = 800 - 150 - 60
+        self.height = self.image.get_height()
+        self.width = self.image.get_width()
+
 
     def update(self, y):
         self.rect.y -= y
 
-    # def set_pos(self, x=self.rect.x, y=self.rect.y):
-    #     self.rect.x = x
-    #     self.rect.y = y
+    def draw(self, screen):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
+class ChelLine(pygame.sprite.Sprite):
+    def __init__(self, *group, **kwargs):
+        super(ChelLine, self).__init__(*group)
+        self.image = pygame.Surface((20, 2))
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.x = 250 + 16
+        self.rect.y = 800 - 150 - 60 + 62
+
+
+    def update(self, y):
+        self.rect.y -= y
+
+    def draw(self, screen):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
