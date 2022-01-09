@@ -78,7 +78,7 @@ class Chel(pygame.sprite.Sprite):
         self.width = self.image.get_width()
         self.rect = self.image.get_rect()
         self.rect.x = 250
-        self.rect.y = 800 - 150 - self.height
+        self.rect.y = 800 - 150 - self.height + 2
 
     def update(self, y):
         self.rect.y -= y

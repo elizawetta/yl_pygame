@@ -21,7 +21,6 @@ def begin_play():
     chel = Chel()
 
     elapsed = 0
-    end = end * 50 + 100
     run_chel = False
     in_jump = False
     start_play = True
@@ -36,10 +35,11 @@ def add_cubes(file_name):
     for i, row in enumerate(file):
         for col, el in enumerate(row):
             if el in 'bgyrs':
-                Cube(cubes, pos=(col * 50 + 300, i * 50 + 150), img=el)
-                Line(lines, pos=(col * 50 + 300, i * 50 + 150))
+                Cube(cubes, pos=(col * 50 + 250, i * 50 + 150), img=el)
+                Line(lines, pos=(col * 50 + 250, i * 50 + 150))
 
                 end = max(end, col)
+    end = end * 50 - 50
 
 
 def check_jump(a):
@@ -60,18 +60,26 @@ def check_jump(a):
 
 
 def check_cross():
-    global in_jump
+    global in_jump, up_flag, up
     global chel
     global level
     global run_chel, start_play
     for i in lines:
         if pygame.sprite.collide_mask(chel, i):
-            if abs(chel.height + chel.rect.y - i.rect.y) < 4:
+            if abs(chel.rect.y + chel.height - i.rect.y) < 4:
+                chel.rect.y = i.rect.y - chel.height + 2
                 level = chel.rect.y
                 in_jump, up_flag = False, False
             else:
                 run_chel = False
                 # TODO: при столкновении на уровень опускаться
+            return
+    if not in_jump:
+        in_jump, up_flag, up = True, False, 65
+        level += 50
+        lines.update(5)
+        cubes.update(5)
+        check_jump(65)
 
 
 def draw_play_screen():
@@ -114,16 +122,17 @@ add_cubes('lvl_1.txt')
 chel = Chel()
 
 elapsed = 0
-end = end * 50 + 100
 
 run_chel = False
 in_jump = False
 start_play = True
 level = chel.rect.y
+zero_lvl = level
+score = 0
 draw_play_screen()
 pygame.display.flip()
-running = True
 
+running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -154,12 +163,15 @@ while running:
         end -= screen_speed * seconds
         elapsed = clock.tick(30)
 
-        if end >= 0:
-            cubes.update(screen_speed * seconds)
-            lines.update(screen_speed * seconds)
-
         if in_jump:
             check_jump(65)
         check_cross()
+        if end > 0:
+            cubes.update(screen_speed * seconds)
+            lines.update(screen_speed * seconds)
+        if end <= 0:
+            run_chel = False
+            chel.rect.y = zero_lvl
+
     draw_play_screen()
     pygame.display.flip()
