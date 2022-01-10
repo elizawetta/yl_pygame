@@ -15,7 +15,7 @@ chel_speed = 250
 
 def begin_play():
     global cubes, lines, chel
-    global run_chel, in_jump, start_play
+    global run_chel, in_jump, start_play, end_game
     global score, end, level
     cubes = pygame.sprite.Group()
     lines = pygame.sprite.Group()
@@ -27,6 +27,7 @@ def begin_play():
     run_chel = False
     in_jump = False
     start_play = True
+    end_game = False
     level = chel.rect.y
 
 
@@ -73,7 +74,7 @@ def check_jump(a):
 
 
 def check_cross():
-    global in_jump, up_flag, up
+    global in_jump, up_flag, up, end_game
     global chel
     global level, score
     global run_chel, start_play
@@ -87,6 +88,7 @@ def check_cross():
                 score += get_points(color)
             else:
                 run_chel = False
+                end_game = True
                 # TODO: при столкновении на уровень опускаться
             return
     if not in_jump:
@@ -129,8 +131,8 @@ def draw_play_screen(screen):
     pygame.draw.rect(screen, 'black', (0, height - 150, width, 150))
 
     # screen.blit(sett_img, (10, 10))
-    screen.blit(pause if run_chel else play, (width - 40 - 10 - 50, 10))
-    screen.blit(repeat, (width - 40 - 10 , 10))
+    screen.blit(pause if run_chel else play, (width - 100, 10))
+    screen.blit(repeat, (width - 50, 10))
 
     lines.draw(screen)
     cubes.draw(screen)
@@ -142,11 +144,13 @@ def draw_play_screen(screen):
         s.set_alpha(125)
         s.fill((255, 255, 255))
         screen.blit(s, (0, 0))
-        if not start_play:
-            screen.blit(play_img, (450, 100))
-            screen.blit(repeat_img, (700, 100))
+        if end_game:
+            screen.blit(repeat_img, ((width - 225) // 2, 200))
+        elif not start_play:
+            screen.blit(play_img, (width // 2 - 225, 200))
+            screen.blit(repeat_img, (width // 2, 200))
         elif start_play:
-            screen.blit(play_img, (700 - 125, 100))
+            screen.blit(play_img, ((width - 225) // 2, 200))
 
 
 sett_img = load_image('settings_img.png', 'images')
@@ -175,6 +179,7 @@ level = chel.rect.y
 zero_lvl = level
 score = 0
 open_flag = False
+end_game = False
 screen.blit(back_img, (0, 0))
 screen.blit(open_img, ((width - 425) // 2, (height - 155) // 2))
 pygame.display.flip()
@@ -190,21 +195,24 @@ while running:
                 open_flag = False
                 continue
             x, y = pygame.mouse.get_pos()
-            if 10 <= x <= 50 and 60 <= y <= 100:
+            if 10 <= y <= 50 and width - 100 <= x <= width - 60:
                 run_chel = not run_chel
                 if run_chel:
                     clock = pygame.time.Clock()
-            if 110 <= y <= 150 and 10 <= x <= 50:
+            if width - 50 <= x <= width - 10 and 10 <= y <= 50:
                 begin_play()
-            if start_play and 700 - 125 <= x <= 700 - 125 + 225 and 100 <= y <= 325:
+            elif start_play and not run_chel and \
+                    (width - 225) // 2 <= x <= (width - 225) // 2 + 225 and 200 <= y <= 425:
                 start_play = False
                 run_chel = True
                 clock = pygame.time.Clock()
-            elif not start_play and 450 <= x <= 450 + 225 and 100 <= y <= 325:
+            elif not start_play and not end_game and width // 2 - 225 <= x <= width // 2 and 200 <= y <= 425:
                 start_play = False
                 run_chel = True
                 clock = pygame.time.Clock()
-            elif not start_play and 700 <= x <= 700 + 225 and 100 <= y <= 325:
+            elif not start_play and not end_game and width // 2 <= x <= width // 2 + 225 and 200 <= y <= 425:
+                begin_play()
+            elif end_game and (width - 225) // 2 <= x <= (width - 225) // 2 + 225 and 200 <= y <= 425:
                 begin_play()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_chel and not in_jump:
             up, up_flag = 65, True
