@@ -27,7 +27,7 @@ def begin_play():
     run_chel = False
     in_jump = False
     start_play = True
-    end_game = False
+    end_game = 0
     level = chel.rect.y
 
 
@@ -88,8 +88,7 @@ def check_cross():
                 score += get_points(color)
             else:
                 run_chel = False
-                end_game = True
-                # TODO: при столкновении на уровень опускаться
+                end_game = -1
             return
     if not in_jump:
         in_jump, up_flag, up = True, False, 65
@@ -100,7 +99,7 @@ def check_cross():
 
 
 def draw_score(screen):
-    font = pygame.font.Font(None, 50)
+    font = pygame.font.Font('font.ttf', 50)
     text1 = font.render(f'Score: {score}', False, '#44FF00')
     text2 = font.render(f'Score: {score}', False, (0, 0, 0))
     text_x = 10
@@ -125,6 +124,19 @@ def start_game(open_img, back_img):
         pygame.time.delay(1)
 
 
+def draw_res(x1, y1, img1, x2, y2, img2, delay):
+    pygame.time.delay(delay)
+    for i in range(0, 255, 10):
+        img_1 = img1.copy()
+        img_2 = img2.copy()
+        img_1.set_alpha(i)
+        img_2.set_alpha(i)
+        screen.blit(img1, (x1, y1))
+        screen.blit(img2, (x2, y2))
+        pygame.display.flip()
+        pygame.time.delay(10)
+
+
 def draw_play_screen(screen):
     global start_play
     screen.fill((204, 255, 255))
@@ -144,11 +156,29 @@ def draw_play_screen(screen):
         s.set_alpha(125)
         s.fill((255, 255, 255))
         screen.blit(s, (0, 0))
-        if end_game:
-            screen.blit(repeat_img, ((width - 225) // 2, 200))
+        if end_game == -1 or end_game == 1:
+            font = pygame.font.Font('font.ttf', 50)
+            if end_game == 1:
+                delay = 400
+                img = load_image('game_over_nice.png', 'images')
+                text1 = font.render(f'Ура, победа!!!', False, (0, 0, 0))
+                text2 = font.render(f'Score: {score}', False, (0, 0, 0))
+            else:
+                delay = 100
+                img = load_image('game_over_bad.png', 'images')
+                text1 = font.render(f'Вы проиграли!', False, (0, 0, 0))
+                text2 = font.render(f'Score: {score}', False, (0, 0, 0))
+            img.blit(text1, ((img.get_width() - text1.get_width()) // 2, 100))
+            img.blit(text2, ((img.get_width() - text2.get_width()) // 2, 200))
+            x_1, y_1 = ((width - img.get_width()) // 2, 80)
+            x_2, y_2 = ((width - 225) // 2, 430)
+            draw_res(x_1, y_1, img, x_2, y_2, repeat_img, delay)
+
+
         elif not start_play:
             screen.blit(play_img, (width // 2 - 225, 200))
             screen.blit(repeat_img, (width // 2, 200))
+
         elif start_play:
             screen.blit(play_img, ((width - 225) // 2, 200))
 
@@ -178,8 +208,8 @@ start_play = True
 level = chel.rect.y
 zero_lvl = level
 score = 0
-open_flag = False
-end_game = False
+open_flag = True
+end_game = 0
 screen.blit(back_img, (0, 0))
 screen.blit(open_img, ((width - 425) // 2, (height - 155) // 2))
 pygame.display.flip()
@@ -199,20 +229,23 @@ while running:
                 run_chel = not run_chel
                 if run_chel:
                     clock = pygame.time.Clock()
-            if width - 50 <= x <= width - 10 and 10 <= y <= 50:
+            elif width - 50 <= x <= width - 10 and 10 <= y <= 50:
                 begin_play()
             elif start_play and not run_chel and \
                     (width - 225) // 2 <= x <= (width - 225) // 2 + 225 and 200 <= y <= 425:
                 start_play = False
                 run_chel = True
                 clock = pygame.time.Clock()
-            elif not start_play and not end_game and width // 2 - 225 <= x <= width // 2 and 200 <= y <= 425:
+            elif not start_play and end_game == 0 \
+                    and width // 2 - 225 <= x <= width // 2 and 200 <= y <= 425:
                 start_play = False
                 run_chel = True
                 clock = pygame.time.Clock()
-            elif not start_play and not end_game and width // 2 <= x <= width // 2 + 225 and 200 <= y <= 425:
+            elif not start_play and end_game == 0 \
+                    and width // 2 <= x <= width // 2 + 225 and 200 <= y <= 425:
                 begin_play()
-            elif end_game and (width - 225) // 2 <= x <= (width - 225) // 2 + 225 and 200 <= y <= 425:
+            elif (end_game == -1 or end_game == 1) \
+                    and (width - 225) // 2 <= x <= (width - 225) // 2 + 225 and 430 <= y <= 430 + 225:
                 begin_play()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_chel and not in_jump:
             up, up_flag = 65, True
@@ -233,6 +266,7 @@ while running:
         if end <= 0:
             run_chel = False
             chel.rect.y = zero_lvl
+            end_game = 1
 
     draw_play_screen(screen)
     pygame.display.flip()
