@@ -101,21 +101,36 @@ def draw_score(screen):
     font = pygame.font.Font(None, 50)
     text1 = font.render(f'Score: {score}', False, '#44FF00')
     text2 = font.render(f'Score: {score}', False, (0, 0, 0))
-    text_x = width // 2 - text1.get_width() // 2
-    text_y = height // 2 - text1.get_height() // 2
+    text_x = 10
+    text_y = 10
 
     screen.blit(text2, (text_x + 2, text_y + 2))
     screen.blit(text1, (text_x, text_y))
 
 
-def draw_play_screen():
+def start_game(open_img, back_img):
+    for i in range(255, -1, -5):
+        screen.fill((255, 255, 255))
+        if i < 120:
+            draw_play_screen(screen)
+        img = open_img.copy()
+        img2 = back_img.copy()
+        img.set_alpha(i)
+        img2.set_alpha(i)
+        screen.blit(img2, (0, 0))
+        screen.blit(img, ((width - 425) // 2, (height - 155) // 2))
+        pygame.display.flip()
+        pygame.time.delay(1)
+
+
+def draw_play_screen(screen):
     global start_play
     screen.fill((204, 255, 255))
     pygame.draw.rect(screen, 'black', (0, height - 150, width, 150))
 
-    screen.blit(sett_img, (10, 10))
-    screen.blit(pause if run_chel else play, (10, 60))
-    screen.blit(repeat, (10, 110))
+    # screen.blit(sett_img, (10, 10))
+    screen.blit(pause if run_chel else play, (width - 40 - 10 - 50, 10))
+    screen.blit(repeat, (width - 40 - 10 , 10))
 
     lines.draw(screen)
     cubes.draw(screen)
@@ -150,21 +165,30 @@ chel = Chel()
 
 elapsed = 0
 
+open_img = load_image('open.png', 'images')
+back_img = load_image('img.png', 'images')
+
 run_chel = False
 in_jump = False
 start_play = True
 level = chel.rect.y
 zero_lvl = level
 score = 0
-draw_play_screen()
+open_flag = False
+screen.blit(back_img, (0, 0))
+screen.blit(open_img, ((width - 425) // 2, (height - 155) // 2))
 pygame.display.flip()
-
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if open_flag:
+                start_game(open_img, back_img)
+                open_flag = False
+                continue
             x, y = pygame.mouse.get_pos()
             if 10 <= x <= 50 and 60 <= y <= 100:
                 run_chel = not run_chel
@@ -185,6 +209,8 @@ while running:
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and run_chel and not in_jump:
             up, up_flag = 65, True
             in_jump = True
+    if open_flag:
+        continue
     if run_chel:
         seconds = elapsed / 1000.0
         end -= screen_speed * seconds
@@ -200,5 +226,5 @@ while running:
             run_chel = False
             chel.rect.y = zero_lvl
 
-    draw_play_screen()
+    draw_play_screen(screen)
     pygame.display.flip()
